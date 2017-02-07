@@ -33,7 +33,7 @@ public class BridgeManager : MonoBehaviour {
 			newBridge.transform.position = selectedPoint.transform.position;
 			var dir = Camera.main.ScreenToWorldPoint (pos) - newBridge.transform.position;
 			var angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-			newBridge.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+			newBridge.transform.rotation = Quaternion.AngleAxis(ClampAngle(angle), Vector3.forward);
 
 			var joint = selectedPoint.AddComponent<HingeJoint2D> ();
 			joint.breakForce = 200f;
@@ -45,7 +45,7 @@ public class BridgeManager : MonoBehaviour {
 		if (selectedPoint != null && newBridge != null) {
 			var dir = Camera.main.ScreenToWorldPoint (pos) - newBridge.transform.position;
 			var angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-			newBridge.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+			newBridge.transform.rotation = Quaternion.AngleAxis(ClampAngle(angle), Vector3.forward);
 		}
 	}
 
@@ -57,5 +57,28 @@ public class BridgeManager : MonoBehaviour {
 	
 	bool CheckForExistingPoint(){
 		return true;
+	}
+
+	float ClampAngle(float angle){
+		if (angle >= 0f && angle < 23f) {
+			return 0f;
+		}else if (angle >= 23f && angle < 68f) {
+			return 45f;
+		}else if (angle >= 68f && angle < 113f) {
+			return 90f;
+		}else if (angle >= 113f && angle < 158f) {
+			return 135f;
+		}else if (angle >= 158f && angle < 203f) {
+			return 180f;
+		}else if (angle >= 203f && angle < 248f) {
+			return 225f;
+		}else if (angle >= 248f && angle < 293f) {
+			return 270f;
+		}else if (angle >= 293f && angle < 338f) {
+			return 315f;
+		}else if (angle >= 338) {
+			return 360f;
+		}
+		return 0f;
 	}
 }
