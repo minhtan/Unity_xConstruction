@@ -92,8 +92,16 @@ public class BridgeManager : MonoBehaviour {
 			var angle = ClampAngle(Mathf.Atan2(dir.y, dir.x)) * Mathf.Rad2Deg;
 			newPart.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
-			var dis = Vector3.Distance (pos, initMousePos);
-			newPart.transform.localScale = new Vector3 (dis/20, newPart.transform.localScale.y, newPart.transform.localScale.z);
+			var step = 0.1f;
+			var dis = Vector2.Distance ((Vector2)GetEndPosition (newPart), (Vector2)Camera.main.ScreenToWorldPoint (pos));
+			while (dis > 0.05f) {
+				newPart.transform.localScale = new Vector3 (newPart.transform.localScale.x + step, newPart.transform.localScale.y, newPart.transform.localScale.z);
+				var newDis = Vector2.Distance ((Vector2)GetEndPosition (newPart), (Vector2)Camera.main.ScreenToWorldPoint (pos));
+				if (newDis > dis) {
+					step = -step;
+				}
+				dis = newDis;
+			}
 		}
 	}
 
@@ -104,17 +112,7 @@ public class BridgeManager : MonoBehaviour {
 		selectedPoint = null;
 		newPart = null;
 	}
-
-	GameObject GetEndPoint(GameObject part){
-		for (int i = 0; i < points.Count; i++) {
-			if (Vector3.Distance( points[i].transform.position, GetEndPosition(part)) < 0.1f) {
-				return points [i];
-			}
-		}
-
-		return AddPoint(part);
-	}
-
+		
 	void AddJoint(GameObject point, GameObject body){
 		var joint = point.AddComponent<HingeJoint2D> ();
 		joint.breakForce = 200f;
@@ -139,6 +137,16 @@ public class BridgeManager : MonoBehaviour {
 
 		parts.Add (part);
 		return part;
+	}
+
+	GameObject GetEndPoint(GameObject part){
+		for (int i = 0; i < points.Count; i++) {
+			if (Vector3.Distance( points[i].transform.position, GetEndPosition(part)) < 0.1f) {
+				return points [i];
+			}
+		}
+
+		return AddPoint(part);
 	}
 
 	Vector3 GetEndPosition(GameObject obj){
