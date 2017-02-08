@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BridgeMarker : MonoBehaviour {
+public class PartMarker : MonoBehaviour {
 
 }

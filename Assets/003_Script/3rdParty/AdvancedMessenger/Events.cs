@@ -4,4 +4,11 @@
 		Realeased,
 		Hold
 	}
+
+	public enum Buttons{
+		SUSPENSION,
+		RAIL,
+		DELETE,
+		PLAY
+	}
 }
