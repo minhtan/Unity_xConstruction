@@ -18,9 +18,9 @@ public class BridgeManager : MonoBehaviour {
 	List<GameObject> parts = new List<GameObject>();
 
 	void Awake () {
-		Messenger.AddListener<Vector3> (Events.Input.Hold, OnMouseHold);
 		Messenger.AddListener<Vector3> (Events.Input.Pressed, OnMousePressed);
-		Messenger.AddListener (Events.Input.Realeased, OnMouseReleased);
+		Messenger.AddListener<Vector3> (Events.Input.Hold, OnMouseHold);
+		Messenger.AddListener<Vector3> (Events.Input.Realeased, OnMouseReleased);
 
 		Messenger.AddListener (Events.Buttons.SUSPENSION, OnSuspensionClick);
 		Messenger.AddListener (Events.Buttons.RAIL, OnRailClick);
@@ -29,9 +29,9 @@ public class BridgeManager : MonoBehaviour {
 	}
 
 	void OnDestroy() {
-		Messenger.RemoveListener<Vector3> (Events.Input.Hold, OnMouseHold);
 		Messenger.RemoveListener<Vector3> (Events.Input.Pressed, OnMousePressed);
-		Messenger.RemoveListener (Events.Input.Realeased, OnMouseReleased);
+		Messenger.RemoveListener<Vector3> (Events.Input.Hold, OnMouseHold);
+		Messenger.RemoveListener<Vector3> (Events.Input.Realeased, OnMouseReleased);
 
 		Messenger.RemoveListener (Events.Buttons.SUSPENSION, OnSuspensionClick);
 		Messenger.RemoveListener (Events.Buttons.RAIL, OnRailClick);
@@ -82,7 +82,7 @@ public class BridgeManager : MonoBehaviour {
 		if (hit.collider != null) {
 			selectedPoint = hit.collider.gameObject;
 			newPart = AddPart (selectedPoint, pos);
-			AddJoint (selectedPoint, newPart);
+			AddJoint (selectedPoint, newPart, 200f);
 		}
 	}
 
@@ -105,17 +105,25 @@ public class BridgeManager : MonoBehaviour {
 		}
 	}
 
-	void OnMouseReleased(){
+	void OnMouseReleased(Vector3 pos){
 		if (selectedPoint != null && newPart != null) {
-			AddJoint (GetEndPoint (newPart), newPart);
+			var point = GetEndPoint (newPart);
+			if (point != null) {
+				AddJoint (point, newPart, 200f);
+			} else {
+				point = AddPoint (newPart);
+				AddJoint (point, newPart);
+			}
 		}
 		selectedPoint = null;
 		newPart = null;
 	}
 		
-	void AddJoint(GameObject point, GameObject body){
+	void AddJoint(GameObject point, GameObject body, float breakForce = 0f){
 		var joint = point.AddComponent<HingeJoint2D> ();
-		joint.breakForce = 200f;
+		if (breakForce != 0f) {
+			joint.breakForce = breakForce;
+		}
 		joint.connectedBody = body.GetComponent<Rigidbody2D>();
 	}
 
@@ -146,7 +154,7 @@ public class BridgeManager : MonoBehaviour {
 			}
 		}
 
-		return AddPoint(part);
+		return null;
 	}
 
 	Vector3 GetEndPosition(GameObject obj){

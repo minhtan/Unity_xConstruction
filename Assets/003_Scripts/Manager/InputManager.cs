@@ -26,7 +26,7 @@ public class InputManager : MonoBehaviour {
 			if (debug) {
 				Debug.Log ("Released");
 			}
-			Messenger.Broadcast (Events.Input.Realeased);	
+			Messenger.Broadcast<Vector3> (Events.Input.Realeased, Input.mousePosition);	
 		}
 	}
 }
