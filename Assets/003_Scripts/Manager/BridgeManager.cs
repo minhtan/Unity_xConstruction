@@ -10,12 +10,18 @@ public class BridgeManager : MonoBehaviour {
 	public GameObject pointPrefab;
 	public LayerMask pointLayer;
 
-	Vector3 initMousePos;
 	GameObject prefabToSpawn;
 	GameObject selectedPoint;
 	GameObject newPart;
 	List<GameObject> points = new List<GameObject>();
 	List<GameObject> parts = new List<GameObject>();
+
+	float angleSnapDegree;
+	List<float> angleToSnap = new List<float>();
+	float minScale;
+	float maxScale;
+
+	Vector2 prevMousePos;
 
 	void Awake () {
 		Messenger.AddListener<Vector3> (Events.Input.Pressed, OnMousePressed);
@@ -40,6 +46,8 @@ public class BridgeManager : MonoBehaviour {
 	}
 
 	void Start(){
+		InitAngleParams ();
+		InitScaleParams ();
 		prefabToSpawn = railPrefab;
 
 		var startPoints = FindObjectsOfType<PointMarker> ();
@@ -51,6 +59,24 @@ public class BridgeManager : MonoBehaviour {
 		for (int i = 0; i < startParts.Length; i++) {
 			parts.Add (startParts [i].gameObject);
 		}
+	}
+
+	void InitAngleParams(){
+		angleSnapDegree = Mathf.PI * 5/180;
+
+		angleToSnap.Add (Mathf.PI *  0/4);
+		angleToSnap.Add (Mathf.PI *  1/4);
+		angleToSnap.Add (Mathf.PI *  2/4);
+		angleToSnap.Add (Mathf.PI *  3/4);
+		angleToSnap.Add (Mathf.PI *  4/4);
+		angleToSnap.Add (Mathf.PI * -3/4);
+		angleToSnap.Add (Mathf.PI * -2/4);
+		angleToSnap.Add (Mathf.PI * -1/4);
+	}
+
+	void InitScaleParams(){
+		minScale = 4f;
+		maxScale = 12f;
 	}
 
 	void OnSuspensionClick(){
@@ -76,9 +102,8 @@ public class BridgeManager : MonoBehaviour {
 	}
 
 	void OnMousePressed(Vector3 pos){
-		initMousePos = pos;
-		Vector2 v = Camera.main.ScreenToWorldPoint (pos);
-		RaycastHit2D hit = Physics2D.Raycast(v, Vector2.zero, Mathf.Infinity, pointLayer);
+		prevMousePos = Camera.main.ScreenToWorldPoint (pos);
+		RaycastHit2D hit = Physics2D.Raycast(prevMousePos, Vector2.zero, Mathf.Infinity, pointLayer);
 		if (hit.collider != null) {
 			selectedPoint = hit.collider.gameObject;
 			newPart = AddPart (selectedPoint, pos);
@@ -89,18 +114,26 @@ public class BridgeManager : MonoBehaviour {
 	void OnMouseHold(Vector3 pos){
 		if (selectedPoint != null && newPart != null) {
 			var dir = Camera.main.ScreenToWorldPoint (pos) - newPart.transform.position;
-			var angle = ClampAngle(Mathf.Atan2(dir.y, dir.x)) * Mathf.Rad2Deg;
+			var angle = SnapAngle(Mathf.Atan2(dir.y, dir.x)) * Mathf.Rad2Deg;
 			newPart.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
-			var step = 0.1f;
-			var dis = Vector2.Distance ((Vector2)GetEndPosition (newPart), (Vector2)Camera.main.ScreenToWorldPoint (pos));
-			while (dis > 0.05f) {
+			float step;
+			var prevMouseDis = (prevMousePos - (Vector2)newPart.transform.position).magnitude;
+			var mouseDis = ((Vector2)Camera.main.ScreenToWorldPoint (pos) - (Vector2)newPart.transform.position).magnitude;
+			if (prevMouseDis > mouseDis) {
+				step = -0.1f;
+			} else {
+				step = 0.1f;
+			}
+			prevMousePos = Camera.main.ScreenToWorldPoint (pos);
+
+			var endPosDis = ((Vector2)GetEndPosition (newPart) - (Vector2)newPart.transform.position).magnitude;
+			var dif = Mathf.Abs(mouseDis - endPosDis);
+			while (dif > 0.05f) {
 				newPart.transform.localScale = new Vector3 (newPart.transform.localScale.x + step, newPart.transform.localScale.y, newPart.transform.localScale.z);
-				var newDis = Vector2.Distance ((Vector2)GetEndPosition (newPart), (Vector2)Camera.main.ScreenToWorldPoint (pos));
-				if (newDis > dis) {
-					step = -step;
-				}
-				dis = newDis;
+
+				endPosDis = ((Vector2)GetEndPosition (newPart) - (Vector2)newPart.transform.position).magnitude;
+				dif = Mathf.Abs(mouseDis - endPosDis);
 			}
 		}
 	}
@@ -139,7 +172,7 @@ public class BridgeManager : MonoBehaviour {
 		var part = LeanPool.Spawn (prefabToSpawn);
 		part.transform.position = origin.transform.position;
 		var dir = Camera.main.ScreenToWorldPoint (mousePos) - part.transform.position;
-		var angle = ClampAngle(Mathf.Atan2(dir.y, dir.x)) * Mathf.Rad2Deg;
+		var angle = SnapAngle(Mathf.Atan2(dir.y, dir.x)) * Mathf.Rad2Deg;
 		part.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 		part.transform.localScale = new Vector3 (0, 1, 1);
 
@@ -161,26 +194,14 @@ public class BridgeManager : MonoBehaviour {
 		return obj.transform.position + (new Vector3(obj.GetComponent<SpriteRenderer> ().sprite.bounds.size.x * obj.transform.localScale.x, 0f, 0f).magnitude * obj.transform.right);
 	}
 
-	float ClampAngle(float rad){
-		return rad;
-		if (rad >= -Mathf.PI * 1/8 && rad < Mathf.PI * 1/8) {
-			return 0f;
-		}else if (rad >= Mathf.PI * 1/8 && rad < Mathf.PI * 3/8) {
-			return Mathf.PI / 4;
-		}else if (rad >= Mathf.PI * 3/8 && rad < Mathf.PI * 5/8) {
-			return Mathf.PI / 2;
-		}else if (rad >= Mathf.PI * 5/8 && rad < Mathf.PI * 7/8) {
-			return Mathf.PI * 3/4;
-		}else if (rad >= Mathf.PI * 7/8 || rad < -Mathf.PI * 7/8) {
-			return Mathf.PI;
-		}else if (rad >= -Mathf.PI * 7/8 && rad < -Mathf.PI * 5/8) {
-			return -Mathf.PI * 3/4;
-		}else if (rad >= -Mathf.PI * 5/8 && rad < -Mathf.PI * 3/8) {
-			return -Mathf.PI / 2;
-		}else if (rad >= -Mathf.PI * 3/8 && rad < -Mathf.PI * 1/8) {
-			return -Mathf.PI / 4;
-		}else {
-			return 0f;
+	float SnapAngle(float rad){
+		for (int i = 0; i < angleToSnap.Count; i++) {
+			if (rad > angleToSnap[i] - angleSnapDegree && rad < angleToSnap[i] + angleSnapDegree) {
+				return angleToSnap [i];
+			}
 		}
+		return rad;
+
+//		return Mathf.Round(rad/(Mathf.PI/4))*(Mathf.PI/4);
 	}
 }
