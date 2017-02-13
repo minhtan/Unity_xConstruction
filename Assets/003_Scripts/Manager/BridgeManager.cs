@@ -129,18 +129,20 @@ public class BridgeManager : MonoBehaviour {
 
 			var endPosDis = ((Vector2)GetEndPosition (newPart) - (Vector2)newPart.transform.position).magnitude;
 			var dif = Mathf.Abs(mouseDis - endPosDis);
-			while (dif > 0.05f) {
+			while (dif > 0.05f && (newPart.transform.localScale.x >= minScale && newPart.transform.localScale.x <= maxScale)) {
 				newPart.transform.localScale = new Vector3 (newPart.transform.localScale.x + step, newPart.transform.localScale.y, newPart.transform.localScale.z);
 
 				endPosDis = ((Vector2)GetEndPosition (newPart) - (Vector2)newPart.transform.position).magnitude;
 				dif = Mathf.Abs(mouseDis - endPosDis);
 			}
+
+//			newPart.transform.localScale = new Vector3 (Mathf.Clamp (newPart.transform.localScale.x, minScale, maxScale), newPart.transform.localScale.y, newPart.transform.localScale.z);
 		}
 	}
 
 	void OnMouseReleased(Vector3 pos){
 		if (selectedPoint != null && newPart != null) {
-			var point = GetEndPoint (newPart);
+			var point = GetPointAtEnd (newPart);
 			if (point != null) {
 				AddJoint (point, newPart, 200f);
 			} else {
@@ -174,13 +176,13 @@ public class BridgeManager : MonoBehaviour {
 		var dir = Camera.main.ScreenToWorldPoint (mousePos) - part.transform.position;
 		var angle = SnapAngle(Mathf.Atan2(dir.y, dir.x)) * Mathf.Rad2Deg;
 		part.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-		part.transform.localScale = new Vector3 (0, 1, 1);
+		part.transform.localScale = new Vector3 (minScale, 1, 1);
 
 		parts.Add (part);
 		return part;
 	}
 
-	GameObject GetEndPoint(GameObject part){
+	GameObject GetPointAtEnd(GameObject part){
 		for (int i = 0; i < points.Count; i++) {
 			if (Vector3.Distance( points[i].transform.position, GetEndPosition(part)) < 0.1f) {
 				return points [i];
