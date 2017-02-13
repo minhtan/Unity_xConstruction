@@ -134,7 +134,12 @@ public class BridgeManager : MonoBehaviour {
 
 	void RotatePart(GameObject part, Vector3 toWorldPoint){
 		var dir = toWorldPoint - part.transform.position;
-		var angle = SnapAngle(Mathf.Atan2(dir.y, dir.x)) * Mathf.Rad2Deg;
+
+		//no snapping
+		var angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+		//snapping
+//		var angle = SnapAngle(Mathf.Atan2(dir.y, dir.x)) * Mathf.Rad2Deg;
+
 		part.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 	}
 
@@ -213,6 +218,7 @@ public class BridgeManager : MonoBehaviour {
 	}
 
 	float SnapAngle(float rad){
+		//snap to 45deg angles
 		for (int i = 0; i < angleToSnap.Count; i++) {
 			if (rad > angleToSnap[i] - angleSnapDegree && rad < angleToSnap[i] + angleSnapDegree) {
 				return angleToSnap [i];
@@ -220,6 +226,7 @@ public class BridgeManager : MonoBehaviour {
 		}
 		return rad;
 
+		//round to 45deg angles
 //		return Mathf.Round(rad/(Mathf.PI/4))*(Mathf.PI/4);
 	}
 }
