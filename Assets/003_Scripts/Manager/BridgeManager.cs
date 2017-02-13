@@ -113,30 +113,8 @@ public class BridgeManager : MonoBehaviour {
 
 	void OnMouseHold(Vector3 pos){
 		if (selectedPoint != null && newPart != null) {
-			var dir = Camera.main.ScreenToWorldPoint (pos) - newPart.transform.position;
-			var angle = SnapAngle(Mathf.Atan2(dir.y, dir.x)) * Mathf.Rad2Deg;
-			newPart.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-
-			float step;
-			var prevMouseDis = (prevMousePos - (Vector2)newPart.transform.position).magnitude;
-			var mouseDis = ((Vector2)Camera.main.ScreenToWorldPoint (pos) - (Vector2)newPart.transform.position).magnitude;
-			if (prevMouseDis > mouseDis) {
-				step = -0.1f;
-			} else {
-				step = 0.1f;
-			}
-			prevMousePos = Camera.main.ScreenToWorldPoint (pos);
-
-			var endPosDis = ((Vector2)GetEndPosition (newPart) - (Vector2)newPart.transform.position).magnitude;
-			var dif = Mathf.Abs(mouseDis - endPosDis);
-			while (dif > 0.05f && (newPart.transform.localScale.x >= minScale && newPart.transform.localScale.x <= maxScale)) {
-				newPart.transform.localScale = new Vector3 (newPart.transform.localScale.x + step, newPart.transform.localScale.y, newPart.transform.localScale.z);
-
-				endPosDis = ((Vector2)GetEndPosition (newPart) - (Vector2)newPart.transform.position).magnitude;
-				dif = Mathf.Abs(mouseDis - endPosDis);
-			}
-
-//			newPart.transform.localScale = new Vector3 (Mathf.Clamp (newPart.transform.localScale.x, minScale, maxScale), newPart.transform.localScale.y, newPart.transform.localScale.z);
+			RotatePart (newPart, Camera.main.ScreenToWorldPoint (pos));
+			ScalePart (newPart, (Vector2)Camera.main.ScreenToWorldPoint (pos));
 		}
 	}
 
@@ -152,6 +130,44 @@ public class BridgeManager : MonoBehaviour {
 		}
 		selectedPoint = null;
 		newPart = null;
+	}
+
+	void RotatePart(GameObject part, Vector3 toWorldPoint){
+		var dir = toWorldPoint - part.transform.position;
+		var angle = SnapAngle(Mathf.Atan2(dir.y, dir.x)) * Mathf.Rad2Deg;
+		part.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+	}
+
+	void ScalePart(GameObject part, Vector2 toWorldPoint){
+		float step;
+		var prevMouseDis = (prevMousePos - (Vector2)part.transform.position).magnitude;
+		var mouseDis = (toWorldPoint - (Vector2)part.transform.position).magnitude;
+
+		if (prevMouseDis > mouseDis && part.transform.localScale.x > minScale) {
+			step = -0.1f;
+		} else if (prevMouseDis < mouseDis && part.transform.localScale.x < maxScale) {
+			step = 0.1f;
+		} else {
+			step = 0f;
+		}
+		prevMousePos = toWorldPoint;
+
+		var endPosDis = ((Vector2)GetEndPosition (part) - (Vector2)part.transform.position).magnitude;
+		var dif = Mathf.Abs(mouseDis - endPosDis);
+		while (step != 0 && dif > 0.05f && (part.transform.localScale.x >= minScale && part.transform.localScale.x <= maxScale)) {
+			part.transform.localScale = new Vector3 (part.transform.localScale.x + step, part.transform.localScale.y, part.transform.localScale.z);
+
+			endPosDis = ((Vector2)GetEndPosition (part) - (Vector2)part.transform.position).magnitude;
+			var newDif = Mathf.Abs(mouseDis - endPosDis);
+			if (newDif >= dif) {
+				part.transform.localScale = new Vector3 (part.transform.localScale.x - step, part.transform.localScale.y, part.transform.localScale.z);
+				break;
+			} else {
+				dif = newDif;
+			}
+		}
+
+		part.transform.localScale = new Vector3 (Mathf.Clamp (part.transform.localScale.x, minScale, maxScale), part.transform.localScale.y, part.transform.localScale.z);
 	}
 		
 	void AddJoint(GameObject point, GameObject body, float breakForce = 0f){
