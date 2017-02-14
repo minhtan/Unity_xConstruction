@@ -15,7 +15,7 @@ public class PartMarker : MonoBehaviour {
 			var hinges = connections [i].GetComponents<HingeJoint2D> ();
 			for (int j = 0; j < hinges.Length; j++) {
 				if (hinges [j].connectedBody == rBody) {
-					Destroy (hinges [j]);
+					DestroyImmediate (hinges [j]);
 				}
 			}
 		}

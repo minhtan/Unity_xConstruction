@@ -116,10 +116,14 @@ public class BridgeManager : MonoBehaviour {
 			if (hit.collider != null) {
 				hit.collider.gameObject.GetComponent<PartMarker> ().ClearConnection ();
 				LeanPool.Despawn (hit.collider.gameObject);
-				for (int i = 0; i < points.Count; i++) {
-					if (points[i].GetComponents<HingeJoint2D>().Length == 0) {
-						points.RemoveAt (i);
+
+				for (int i = 0; i < points.Count;) {
+					Debug.Log (points [i].gameObject.name + " " + points [i].GetComponents<HingeJoint2D> ().Length);
+					if (points [i].GetComponents<HingeJoint2D> ().Length <= 0) {
 						LeanPool.Despawn (points [i]);
+						points.RemoveAt (i);
+					} else {
+						i++;
 					}
 				}
 			}	
