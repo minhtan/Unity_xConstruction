@@ -9,6 +9,7 @@ public class BridgeManager : MonoBehaviour {
 	public GameObject suspensionPrefab;
 	public GameObject pointPrefab;
 	public LayerMask pointLayer;
+	public LayerMask partLayer;
 
 	GameObject prefabToSpawn;
 	GameObject selectedPoint;
@@ -102,12 +103,26 @@ public class BridgeManager : MonoBehaviour {
 	}
 
 	void OnMousePressed(Vector3 pos){
-		prevMousePos = Camera.main.ScreenToWorldPoint (pos);
-		RaycastHit2D hit = Physics2D.Raycast(prevMousePos, Vector2.zero, Mathf.Infinity, pointLayer);
-		if (hit.collider != null) {
-			selectedPoint = hit.collider.gameObject;
-			newPart = AddPart (selectedPoint, pos);
-			AddJoint (selectedPoint, newPart, 200f);
+		if (prefabToSpawn != null) {
+			prevMousePos = Camera.main.ScreenToWorldPoint (pos);
+			RaycastHit2D hit = Physics2D.Raycast (prevMousePos, Vector2.zero, Mathf.Infinity, pointLayer);
+			if (hit.collider != null) {
+				selectedPoint = hit.collider.gameObject;
+				newPart = AddPart (selectedPoint, pos);
+				AddJoint (selectedPoint, newPart, 200f);
+			}
+		} else {
+			RaycastHit2D hit = Physics2D.Raycast (Camera.main.ScreenToWorldPoint (pos), Vector2.zero, Mathf.Infinity, partLayer);
+			if (hit.collider != null) {
+				hit.collider.gameObject.GetComponent<PartMarker> ().ClearConnection ();
+				LeanPool.Despawn (hit.collider.gameObject);
+				for (int i = 0; i < points.Count; i++) {
+					if (points[i].GetComponents<HingeJoint2D>().Length == 0) {
+						points.RemoveAt (i);
+						LeanPool.Despawn (points [i]);
+					}
+				}
+			}	
 		}
 	}
 
@@ -115,6 +130,7 @@ public class BridgeManager : MonoBehaviour {
 		if (selectedPoint != null && newPart != null) {
 			RotatePart (newPart, Camera.main.ScreenToWorldPoint (pos));
 			ScalePart (newPart, (Vector2)Camera.main.ScreenToWorldPoint (pos));
+			SnapToPoint (newPart);
 		}
 	}
 
@@ -127,6 +143,7 @@ public class BridgeManager : MonoBehaviour {
 				point = AddPoint (newPart);
 				AddJoint (point, newPart);
 			}
+			RotatePart (newPart, point.transform.position);
 		}
 		selectedPoint = null;
 		newPart = null;
@@ -159,7 +176,7 @@ public class BridgeManager : MonoBehaviour {
 
 		var endPosDis = ((Vector2)GetEndPosition (part) - (Vector2)part.transform.position).magnitude;
 		var dif = Mathf.Abs(mouseDis - endPosDis);
-		while (step != 0 && dif > 0.05f && (part.transform.localScale.x >= minScale && part.transform.localScale.x <= maxScale)) {
+		while (step != 0 && dif > 0.01f && (part.transform.localScale.x >= minScale && part.transform.localScale.x <= maxScale)) {
 			part.transform.localScale = new Vector3 (part.transform.localScale.x + step, part.transform.localScale.y, part.transform.localScale.z);
 
 			endPosDis = ((Vector2)GetEndPosition (part) - (Vector2)part.transform.position).magnitude;
@@ -174,6 +191,14 @@ public class BridgeManager : MonoBehaviour {
 
 		part.transform.localScale = new Vector3 (Mathf.Clamp (part.transform.localScale.x, minScale, maxScale), part.transform.localScale.y, part.transform.localScale.z);
 	}
+
+	void SnapToPoint(GameObject part){
+		var point = GetPointAtEnd (part, 0.3f);
+		if (point != null) {
+			RotatePart (part, point.transform.position);
+			ScalePart (part, (Vector2)point.transform.position);
+		}
+	}
 		
 	void AddJoint(GameObject point, GameObject body, float breakForce = 0f){
 		var joint = point.AddComponent<HingeJoint2D> ();
@@ -181,6 +206,7 @@ public class BridgeManager : MonoBehaviour {
 			joint.breakForce = breakForce;
 		}
 		joint.connectedBody = body.GetComponent<Rigidbody2D>();
+		body.GetComponent<PartMarker> ().AddConnection (point);
 	}
 
 	GameObject AddPoint(GameObject pos){
@@ -203,9 +229,9 @@ public class BridgeManager : MonoBehaviour {
 		return part;
 	}
 
-	GameObject GetPointAtEnd(GameObject part){
+	GameObject GetPointAtEnd(GameObject part, float minDistance = 0.1f){
 		for (int i = 0; i < points.Count; i++) {
-			if (Vector3.Distance( points[i].transform.position, GetEndPosition(part)) < 0.1f) {
+			if (Vector3.Distance( points[i].transform.position, GetEndPosition(part)) < minDistance) {
 				return points [i];
 			}
 		}
