@@ -118,7 +118,6 @@ public class BridgeManager : MonoBehaviour {
 				LeanPool.Despawn (hit.collider.gameObject);
 
 				for (int i = 0; i < points.Count;) {
-					Debug.Log (points [i].gameObject.name + " " + points [i].GetComponents<HingeJoint2D> ().Length);
 					if (points [i].GetComponents<HingeJoint2D> ().Length <= 0) {
 						LeanPool.Despawn (points [i]);
 						points.RemoveAt (i);
