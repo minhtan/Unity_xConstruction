@@ -77,7 +77,7 @@ public class BridgeManager : MonoBehaviour {
 
 	void InitScaleParams(){
 		minScale = 4f;
-		maxScale = 12f;
+		maxScale = 8f;
 	}
 
 	void OnSuspensionClick(){
@@ -131,7 +131,7 @@ public class BridgeManager : MonoBehaviour {
 
 	void OnMouseHold(Vector3 pos){
 		if (selectedPoint != null && newPart != null) {
-			RotatePart (newPart, Camera.main.ScreenToWorldPoint (pos));
+			RotatePart (newPart, Camera.main.ScreenToWorldPoint (pos), true);
 			ScalePart (newPart, (Vector2)Camera.main.ScreenToWorldPoint (pos));
 			SnapToPoint (newPart);
 		}
@@ -152,13 +152,15 @@ public class BridgeManager : MonoBehaviour {
 		newPart = null;
 	}
 
-	void RotatePart(GameObject part, Vector3 toWorldPoint){
+	void RotatePart(GameObject part, Vector3 toWorldPoint, bool snap = false){
 		var dir = toWorldPoint - part.transform.position;
 
-		//no snapping
-		var angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-		//snapping
-//		var angle = SnapAngle(Mathf.Atan2(dir.y, dir.x)) * Mathf.Rad2Deg;
+		float angle;
+		if (snap) {
+			angle = SnapAngle (Mathf.Atan2 (dir.y, dir.x)) * Mathf.Rad2Deg;
+		} else {
+			angle = Mathf.Atan2 (dir.y, dir.x) * Mathf.Rad2Deg;
+		}
 
 		part.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 	}
