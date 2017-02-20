@@ -16,6 +16,7 @@ public class BridgeManager : MonoBehaviour {
 	GameObject newPart;
 	List<GameObject> points = new List<GameObject>();
 	List<GameObject> parts = new List<GameObject>();
+	List<GameObject> origins = new List<GameObject> ();
 
 	float angleSnapDegree;
 	List<float> angleToSnap = new List<float>();
@@ -33,6 +34,8 @@ public class BridgeManager : MonoBehaviour {
 		Messenger.AddListener (Events.Buttons.RAIL, OnRailClick);
 		Messenger.AddListener (Events.Buttons.DELETE, OnDeleteClick);
 		Messenger.AddListener (Events.Buttons.PLAY, OnPlayClick);
+		Messenger.AddListener (Events.Buttons.CLEAR_ALL, ClearAll);
+		Messenger.AddListener (Events.Buttons.RESET, Reset);
 	}
 
 	void OnDestroy() {
@@ -44,6 +47,8 @@ public class BridgeManager : MonoBehaviour {
 		Messenger.RemoveListener (Events.Buttons.RAIL, OnRailClick);
 		Messenger.RemoveListener (Events.Buttons.DELETE, OnDeleteClick);
 		Messenger.RemoveListener (Events.Buttons.PLAY, OnPlayClick);
+		Messenger.RemoveListener (Events.Buttons.CLEAR_ALL, ClearAll);
+		Messenger.RemoveListener (Events.Buttons.RESET, Reset);
 	}
 
 	void Start(){
@@ -51,14 +56,9 @@ public class BridgeManager : MonoBehaviour {
 		InitScaleParams ();
 		prefabToSpawn = railPrefab;
 
-		var startPoints = FindObjectsOfType<PointMarker> ();
-		for (int i = 0; i < startPoints.Length; i++) {
-			points.Add(startPoints[i].gameObject);
-		}
-
-		var startParts = FindObjectsOfType<PartMarker> ();
-		for (int i = 0; i < startParts.Length; i++) {
-			parts.Add (startParts [i].gameObject);
+		var originsGo = FindObjectsOfType<OriginMarker> ();
+		for (int i = 0; i < originsGo.Length; i++) {
+			origins.Add (originsGo[i].gameObject);
 		}
 	}
 
@@ -100,6 +100,10 @@ public class BridgeManager : MonoBehaviour {
 		for (int i = 0; i < parts.Count; i++) {
 			parts [i].GetComponent<Rigidbody2D> ().isKinematic = false;
 		}
+
+		for (int i = 0; i < origins.Count; i++) {
+			origins [i].GetComponent<Rigidbody2D> ().isKinematic = false;
+		}
 	}
 
 	void OnMousePressed(Vector3 pos){
@@ -114,11 +118,13 @@ public class BridgeManager : MonoBehaviour {
 		} else {
 			RaycastHit2D hit = Physics2D.Raycast (Camera.main.ScreenToWorldPoint (pos), Vector2.zero, Mathf.Infinity, partLayer);
 			if (hit.collider != null) {
-				hit.collider.gameObject.GetComponent<PartMarker> ().ClearConnection ();
+				hit.collider.gameObject.GetComponent<PartMarker> ().Reset ();
 				LeanPool.Despawn (hit.collider.gameObject);
+				parts.Remove (hit.collider.gameObject);
 
 				for (int i = 0; i < points.Count;) {
 					if (points [i].GetComponents<HingeJoint2D> ().Length <= 0) {
+						points [i].GetComponent<PointMarker> ().Reset ();
 						LeanPool.Despawn (points [i]);
 						points.RemoveAt (i);
 					} else {
@@ -259,5 +265,27 @@ public class BridgeManager : MonoBehaviour {
 
 		//round to 45deg angles
 //		return Mathf.Round(rad/(Mathf.PI/4))*(Mathf.PI/4);
+	}
+
+	void ClearAll(){
+		for (int i = 0; i < parts.Count; i++) {
+			parts [i].GetComponent<PartMarker> ().Reset ();
+			LeanPool.Despawn (parts [i]);
+
+		}
+		parts.Clear ();
+
+		for (int i = 0; i < points.Count; i++) {
+			points [i].GetComponent<PointMarker> ().Reset ();
+			LeanPool.Despawn (points [i]);
+		}
+		points.Clear ();
+	}
+
+	void Reset(){
+		ClearAll ();
+		for (int i = 0; i < origins.Count; i++) {
+			origins [i].GetComponent<OriginMarker> ().Reset ();
+		}
 	}
 }

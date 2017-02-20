@@ -9,6 +9,8 @@
 		SUSPENSION,
 		RAIL,
 		DELETE,
-		PLAY
+		PLAY,
+		CLEAR_ALL,
+		RESET
 	}
 }

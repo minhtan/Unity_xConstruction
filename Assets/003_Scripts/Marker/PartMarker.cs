@@ -9,13 +9,15 @@ public class PartMarker : MonoBehaviour {
 		connections.Add (go);
 	}
 
-	public void ClearConnection(){
+	public void Reset(){
+		GetComponent<Rigidbody2D> ().isKinematic = true;
 		var rBody = GetComponent<Rigidbody2D> ();
 		for (int i = 0; i < connections.Count; i++) {
 			var hinges = connections [i].GetComponents<HingeJoint2D> ();
 			for (int j = 0; j < hinges.Length; j++) {
 				if (hinges [j].connectedBody == rBody) {
 					DestroyImmediate (hinges [j]);
+					break;
 				}
 			}
 		}
