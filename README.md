@@ -12,3 +12,6 @@ A bridge construction game made with Unity
 ## TODO
 - [] levels load
 - [] menu
+- [] play charges system
+- [] UI
+- [] add ads (tbd)
