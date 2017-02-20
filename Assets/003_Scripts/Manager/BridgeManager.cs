@@ -60,6 +60,15 @@ public class BridgeManager : MonoBehaviour {
 		for (int i = 0; i < originsGo.Length; i++) {
 			origins.Add (originsGo[i].gameObject);
 		}
+
+		GetStartPoints ();
+	}
+
+	void GetStartPoints(){
+		var startPoints = FindObjectsOfType<PointMarker> ();
+		for (int i = 0; i < startPoints.Length; i++) {
+			origins.Add (startPoints[i].gameObject);
+		}
 	}
 
 	void InitAngleParams(){
@@ -287,5 +296,6 @@ public class BridgeManager : MonoBehaviour {
 		for (int i = 0; i < origins.Count; i++) {
 			origins [i].GetComponent<OriginMarker> ().Reset ();
 		}
+		GetStartPoints ();
 	}
 }

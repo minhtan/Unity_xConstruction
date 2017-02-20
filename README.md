@@ -10,6 +10,7 @@ A bridge construction game made with Unity
 - playable game
 
 ## TODO
+- [] camera bounds
 - [] levels load
 - [] menu
 - [] play charges system
