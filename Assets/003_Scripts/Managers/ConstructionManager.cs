@@ -3,7 +3,7 @@ using System.Collections;
 using Lean;
 using System.Collections.Generic;
 
-public class BridgeManager : MonoBehaviour {
+public class ConstructionManager : UnitySingletonPersistent<ConstructionManager> {
 
 	public GameObject railPrefab;
 	public GameObject suspensionPrefab;
@@ -25,7 +25,9 @@ public class BridgeManager : MonoBehaviour {
 
 	Vector2 prevMousePos;
 
-	void Awake () {
+	void OnEnable () {
+		InitAngleParams ();
+
 		Messenger.AddListener<Vector3> (Events.Input.Pressed, OnMousePressed);
 		Messenger.AddListener<Vector3> (Events.Input.Hold, OnMouseHold);
 		Messenger.AddListener<Vector3> (Events.Input.Realeased, OnMouseReleased);
@@ -34,8 +36,7 @@ public class BridgeManager : MonoBehaviour {
 		Messenger.AddListener (Events.Buttons.RAIL, OnRailClick);
 		Messenger.AddListener (Events.Buttons.DELETE, OnDeleteClick);
 		Messenger.AddListener (Events.Buttons.PLAY, OnPlayClick);
-		Messenger.AddListener (Events.Buttons.CLEAR_ALL, ClearAll);
-		Messenger.AddListener (Events.Buttons.RESET, Reset);
+		Messenger.AddListener (Events.Buttons.RESET, OnResetClick);
 	}
 
 	void OnDestroy() {
@@ -47,27 +48,24 @@ public class BridgeManager : MonoBehaviour {
 		Messenger.RemoveListener (Events.Buttons.RAIL, OnRailClick);
 		Messenger.RemoveListener (Events.Buttons.DELETE, OnDeleteClick);
 		Messenger.RemoveListener (Events.Buttons.PLAY, OnPlayClick);
-		Messenger.RemoveListener (Events.Buttons.CLEAR_ALL, ClearAll);
-		Messenger.RemoveListener (Events.Buttons.RESET, Reset);
+		Messenger.RemoveListener (Events.Buttons.RESET, OnResetClick);
 	}
 
-	void Start(){
-		InitAngleParams ();
-		InitScaleParams ();
+	public void Init(){
 		prefabToSpawn = railPrefab;
+		InitScaleParams ();
+		GetOrigins ();
+	}
 
+	void GetOrigins(){
 		var originsGo = FindObjectsOfType<OriginMarker> ();
 		for (int i = 0; i < originsGo.Length; i++) {
 			origins.Add (originsGo[i].gameObject);
 		}
 
-		GetStartPoints ();
-	}
-
-	void GetStartPoints(){
 		var startPoints = FindObjectsOfType<PointMarker> ();
 		for (int i = 0; i < startPoints.Length; i++) {
-			origins.Add (startPoints[i].gameObject);
+			points.Add (startPoints[i].gameObject);
 		}
 	}
 
@@ -113,6 +111,11 @@ public class BridgeManager : MonoBehaviour {
 		for (int i = 0; i < origins.Count; i++) {
 			origins [i].GetComponent<Rigidbody2D> ().isKinematic = false;
 		}
+	}
+
+	void OnResetClick(){
+		ClearAll ();
+		GetOrigins ();
 	}
 
 	void OnMousePressed(Vector3 pos){
@@ -276,26 +279,29 @@ public class BridgeManager : MonoBehaviour {
 //		return Mathf.Round(rad/(Mathf.PI/4))*(Mathf.PI/4);
 	}
 
-	void ClearAll(){
+	public void ClearAll(){
 		for (int i = 0; i < parts.Count; i++) {
-			parts [i].GetComponent<PartMarker> ().Reset ();
-			LeanPool.Despawn (parts [i]);
-
+			if (!origins.Contains(parts [i])) {
+				parts [i].GetComponent<PartMarker> ().Reset ();
+				LeanPool.Despawn (parts [i]);
+			}
 		}
 		parts.Clear ();
 
 		for (int i = 0; i < points.Count; i++) {
-			points [i].GetComponent<PointMarker> ().Reset ();
-			LeanPool.Despawn (points [i]);
+			if (!origins.Contains(points [i])) {
+				points [i].GetComponent<PointMarker> ().Reset ();
+				LeanPool.Despawn (points [i]);
+			}
 		}
 		points.Clear ();
-	}
 
-	void Reset(){
-		ClearAll ();
 		for (int i = 0; i < origins.Count; i++) {
-			origins [i].GetComponent<OriginMarker> ().Reset ();
+			var originMarker = origins [i].GetComponent<OriginMarker> ();
+			if (originMarker != null) {
+				originMarker.Reset ();
+			}
 		}
-		GetStartPoints ();
+		origins.Clear ();
 	}
 }

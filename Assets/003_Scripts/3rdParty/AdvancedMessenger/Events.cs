@@ -10,7 +10,6 @@
 		RAIL,
 		DELETE,
 		PLAY,
-		CLEAR_ALL,
 		RESET
 	}
 }
