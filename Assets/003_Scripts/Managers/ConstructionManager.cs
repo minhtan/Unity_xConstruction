@@ -18,19 +18,20 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 	List<GameObject> parts = new List<GameObject>();
 	List<GameObject> origins = new List<GameObject> ();
 
+	Vector2 prevMousePos;
+
 	float angleSnapDegree;
 	List<float> angleToSnap = new List<float>();
-	public float minScale;
-	public float maxScale;
-
-	Vector2 prevMousePos;
+	float minScale = 4f;
+	float maxScale = 8f;
+	int maxPart = 10;
 
 	void OnEnable () {
 		InitAngleParams ();
 
-		Messenger.AddListener<Vector3> (Events.Input.Pressed, OnMousePressed);
-		Messenger.AddListener<Vector3> (Events.Input.Hold, OnMouseHold);
-		Messenger.AddListener<Vector3> (Events.Input.Realeased, OnMouseReleased);
+		Messenger.AddListener<Vector3> (Events.Input.PRESSED, OnMousePressed);
+		Messenger.AddListener<Vector3> (Events.Input.HOLD, OnMouseHold);
+		Messenger.AddListener<Vector3> (Events.Input.RELEASED, OnMouseReleased);
 
 		Messenger.AddListener (Events.Buttons.SUSPENSION, OnSuspensionClick);
 		Messenger.AddListener (Events.Buttons.RAIL, OnRailClick);
@@ -40,9 +41,9 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 	}
 
 	void OnDestroy() {
-		Messenger.RemoveListener<Vector3> (Events.Input.Pressed, OnMousePressed);
-		Messenger.RemoveListener<Vector3> (Events.Input.Hold, OnMouseHold);
-		Messenger.RemoveListener<Vector3> (Events.Input.Realeased, OnMouseReleased);
+		Messenger.RemoveListener<Vector3> (Events.Input.PRESSED, OnMousePressed);
+		Messenger.RemoveListener<Vector3> (Events.Input.HOLD, OnMouseHold);
+		Messenger.RemoveListener<Vector3> (Events.Input.RELEASED, OnMouseReleased);
 
 		Messenger.RemoveListener (Events.Buttons.SUSPENSION, OnSuspensionClick);
 		Messenger.RemoveListener (Events.Buttons.RAIL, OnRailClick);
@@ -53,8 +54,8 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 
 	public void Init(){
 		prefabToSpawn = railPrefab;
-		InitScaleParams ();
 		GetOrigins ();
+		Messenger.Broadcast<int, int> (Events.Game.PART_CHANGED, parts.Count, maxPart);
 	}
 
 	void GetOrigins(){
@@ -82,9 +83,10 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		angleToSnap.Add (Mathf.PI * -1/4);
 	}
 
-	void InitScaleParams(){
-		minScale = 4f;
-		maxScale = 8f;
+	public void SetLevelParams(float minPartScale, float maxPartScale, int maxPart){
+		minScale = minPartScale;
+		maxScale = maxPartScale;
+		this.maxPart = maxPart;
 	}
 
 	void OnSuspensionClick(){
@@ -122,10 +124,12 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		if (prefabToSpawn != null) {
 			prevMousePos = Camera.main.ScreenToWorldPoint (pos);
 			RaycastHit2D hit = Physics2D.Raycast (prevMousePos, Vector2.zero, Mathf.Infinity, pointLayer);
-			if (hit.collider != null) {
+			if (hit.collider != null && parts.Count < maxPart) {
 				selectedPoint = hit.collider.gameObject;
 				newPart = AddPart (selectedPoint, pos);
 				AddJoint (selectedPoint, newPart, 200f);
+
+				Messenger.Broadcast<int, int> (Events.Game.PART_CHANGED, parts.Count, maxPart);
 			}
 		} else {
 			RaycastHit2D hit = Physics2D.Raycast (Camera.main.ScreenToWorldPoint (pos), Vector2.zero, Mathf.Infinity, partLayer);
@@ -143,6 +147,8 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 						i++;
 					}
 				}
+
+				Messenger.Broadcast<int, int> (Events.Game.PART_CHANGED, parts.Count, maxPart);
 			}	
 		}
 	}
@@ -287,6 +293,7 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 			}
 		}
 		parts.Clear ();
+		Messenger.Broadcast<int, int> (Events.Game.PART_CHANGED, parts.Count, maxPart);
 
 		for (int i = 0; i < points.Count; i++) {
 			if (!origins.Contains(points [i])) {

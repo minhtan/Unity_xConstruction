@@ -14,19 +14,19 @@ public class InputManager : MonoBehaviour {
 			if (debug) {
 				Debug.Log ("Hold");
 			}
-			Messenger.Broadcast<Vector3> (Events.Input.Hold, Input.mousePosition);	
+			Messenger.Broadcast<Vector3> (Events.Input.HOLD, Input.mousePosition);	
 		}
 		if (Input.GetMouseButtonDown(0)) {
 			if (debug) {
 				Debug.Log ("Pressed");
 			}
-			Messenger.Broadcast<Vector3> (Events.Input.Pressed, Input.mousePosition);	
+			Messenger.Broadcast<Vector3> (Events.Input.PRESSED, Input.mousePosition);	
 		}
 		if (Input.GetMouseButtonUp(0)) {
 			if (debug) {
 				Debug.Log ("Released");
 			}
-			Messenger.Broadcast<Vector3> (Events.Input.Realeased, Input.mousePosition);	
+			Messenger.Broadcast<Vector3> (Events.Input.RELEASED, Input.mousePosition);	
 		}
 	}
 }

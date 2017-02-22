@@ -1,8 +1,8 @@
 ﻿public class Events {
 	public enum Input{
-		Pressed,
-		Realeased,
-		Hold
+		PRESSED,
+		RELEASED,
+		HOLD
 	}
 
 	public enum Buttons{
@@ -11,5 +11,9 @@
 		DELETE,
 		PLAY,
 		RESET
+	}
+
+	public enum Game{
+		PART_CHANGED
 	}
 }

@@ -13,6 +13,7 @@ A bridge construction game made with Unity
 - [x] camera bounds
 - [x] levels load
 - [x] menu
+- [] add level params
 - [] play charges system
 - [] UI
 - [] add ads (tbd)
