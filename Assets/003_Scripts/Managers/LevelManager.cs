@@ -5,7 +5,11 @@ public class LevelManager : MonoBehaviour {
 	GameObject currentLvl;
 
 	void Start(){
-		LoadLevel ("Level_001");
+		if (!PlayerPrefs.HasKey (ConstantData.PP_LevelPicked)) {
+			LoadLevel ("Level_001");
+		} else {
+			LoadLevel (PlayerPrefs.GetString(ConstantData.PP_LevelPicked));
+		}
 	}
 
 	// Use this for initialization
@@ -23,7 +27,7 @@ public class LevelManager : MonoBehaviour {
 	}
 
 	IEnumerator LoadLevel(string lvlToLoad, System.Action<GameObject> callback){
-		var r = Resources.LoadAsync<GameObject> ("Levels/" + lvlToLoad);
+		var r = Resources.LoadAsync<GameObject> (ConstantData.LevelsFolder + lvlToLoad);
 		while(!r.isDone){
 			yield return null;
 		}

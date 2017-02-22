@@ -20,8 +20,8 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 
 	float angleSnapDegree;
 	List<float> angleToSnap = new List<float>();
-	float minScale;
-	float maxScale;
+	public float minScale;
+	public float maxScale;
 
 	Vector2 prevMousePos;
 

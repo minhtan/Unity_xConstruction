@@ -1,19 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-
-public class BtnSendEvent : MonoBehaviour {
-
-	public Events.Buttons eventToSend;
+public class ButtonQuit : MonoBehaviour {
 
 	// Use this for initialization
-	void Start () {
+	void OnEnable () {
 		GetComponent<Button> ().onClick.AddListener (() => {
-			Messenger.Broadcast(eventToSend);
+			Application.Quit();
 		});
 	}
 
-	void OnDestroy(){
+	void OnDisable() {
 		GetComponent<Button> ().onClick.RemoveAllListeners ();
 	}
 }
