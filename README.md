@@ -17,7 +17,7 @@ A bridge construction game made with Unity
 - [x] add level params
 - [x] add the moving vehicle
 - [x] add game manager
-- [x] process win/lose
+- [ ] process win/lose
 - [ ] play charges system
 - [ ] UI
 - [ ] add ads (tbd)
