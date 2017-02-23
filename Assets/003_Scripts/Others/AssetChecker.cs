@@ -6,21 +6,6 @@ using System.Collections.Generic;
 public class AssetChecker : AssetPostprocessor {
 	static void OnPostprocessAllAssets (string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths) 
 	{
-		//For debugging
-//		foreach (string str in importedAssets)
-//		{
-//			Debug.Log("Reimported Asset: " + str);
-//		}
-//		foreach (string str in deletedAssets) 
-//		{
-//			Debug.Log("Deleted Asset: " + str);
-//		}
-//
-//		for (int i=0; i<movedAssets.Length; i++)
-//		{
-//			Debug.Log("Moved Asset: " + movedAssets[i] + " from: " + movedFromAssetPaths[i]);
-//		}
-
 		var lvlInfo = Resources.Load<LevelsInfo> (ConstantData.LevelsInfoPath);
 
 		if (lvlInfo == null) {
@@ -28,7 +13,6 @@ public class AssetChecker : AssetPostprocessor {
 			AssetDatabase.CreateAsset (lvlInfo, "Assets/Resources/" + ConstantData.LevelsInfoPath + ".asset");
 			AssetDatabase.SaveAssets ();
 		}
-
 
 		foreach (string str in deletedAssets) 
 		{
@@ -51,11 +35,5 @@ public class AssetChecker : AssetPostprocessor {
 				lvlInfo.names.AddIfNotExist(newStr);
 			}
 		}
-
-//		lvlInfo.names.Clear ();
-//		var levels = Resources.LoadAll (ConstantData.LevelsFolder);
-//		for (int i = 0; i < levels.Length; i++) {
-//			lvlInfo.names.Add (levels [i].name);
-//		}
 	}
 }

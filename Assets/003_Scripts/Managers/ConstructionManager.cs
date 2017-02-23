@@ -10,6 +10,7 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 	public GameObject pointPrefab;
 	public LayerMask pointLayer;
 	public LayerMask partLayer;
+	public float breakForce = 200f;
 
 	GameObject prefabToSpawn;
 	GameObject selectedPoint;
@@ -83,10 +84,11 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		angleToSnap.Add (Mathf.PI * -1/4);
 	}
 
-	public void SetLevelParams(float minPartScale, float maxPartScale, int maxPart){
+	public void SetLevelParams(float minPartScale, float maxPartScale, int maxPart, float breakForce){
 		minScale = minPartScale;
 		maxScale = maxPartScale;
 		this.maxPart = maxPart;
+		this.breakForce = breakForce;
 	}
 
 	void OnSuspensionClick(){
@@ -127,7 +129,7 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 			if (hit.collider != null && parts.Count < maxPart) {
 				selectedPoint = hit.collider.gameObject;
 				newPart = AddPart (selectedPoint, pos);
-				AddJoint (selectedPoint, newPart, 200f);
+				AddJoint (selectedPoint, newPart, breakForce);
 
 				Messenger.Broadcast<int, int> (Events.Game.PART_CHANGED, parts.Count, maxPart);
 			}
@@ -165,7 +167,7 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		if (selectedPoint != null && newPart != null) {
 			var point = GetPointAtEnd (newPart);
 			if (point != null) {
-				AddJoint (point, newPart, 200f);
+				AddJoint (point, newPart, breakForce);
 			} else {
 				point = AddPoint (newPart);
 				AddJoint (point, newPart);
