@@ -6,6 +6,7 @@ A bridge construction game made with Unity
 - [tan](https://github.com/minhtan)
 
 ## Current state
+- mock main menu + ingame UI
 - functional construction with add/edit/delete
 - playable game
 
@@ -16,7 +17,7 @@ A bridge construction game made with Unity
 - [x] add level params
 - [x] add the moving vehicle
 - [x] add game manager
-- [] process win/lose
-- [] play charges system
-- [] UI
-- [] add ads (tbd)
+- [x] process win/lose
+- [ ] play charges system
+- [ ] UI
+- [ ] add ads (tbd)

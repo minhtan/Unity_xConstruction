@@ -15,6 +15,7 @@
 
 	public enum Game{
 		PART_CHANGED,
-		WIN
+		WIN,
+		TIME_CHANGED
 	}
 }
