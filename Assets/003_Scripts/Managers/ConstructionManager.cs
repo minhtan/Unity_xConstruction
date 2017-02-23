@@ -10,7 +10,7 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 	public GameObject pointPrefab;
 	public LayerMask pointLayer;
 	public LayerMask partLayer;
-	public float breakForce = 200f;
+	float breakForce = 200f;
 
 	GameObject prefabToSpawn;
 	GameObject selectedPoint;
@@ -37,8 +37,6 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		Messenger.AddListener (Events.Buttons.SUSPENSION, OnSuspensionClick);
 		Messenger.AddListener (Events.Buttons.RAIL, OnRailClick);
 		Messenger.AddListener (Events.Buttons.DELETE, OnDeleteClick);
-		Messenger.AddListener (Events.Buttons.PLAY, OnPlayClick);
-		Messenger.AddListener (Events.Buttons.RESET, OnResetClick);
 	}
 
 	void OnDestroy() {
@@ -49,8 +47,6 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		Messenger.RemoveListener (Events.Buttons.SUSPENSION, OnSuspensionClick);
 		Messenger.RemoveListener (Events.Buttons.RAIL, OnRailClick);
 		Messenger.RemoveListener (Events.Buttons.DELETE, OnDeleteClick);
-		Messenger.RemoveListener (Events.Buttons.PLAY, OnPlayClick);
-		Messenger.RemoveListener (Events.Buttons.RESET, OnResetClick);
 	}
 
 	public void Init(){
@@ -103,7 +99,7 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		prefabToSpawn = null;
 	}
 
-	void OnPlayClick(){
+	public void PutThingsInMotion(){
 		for (int i = 0; i < points.Count; i++) {
 			points [i].GetComponent<Rigidbody2D> ().isKinematic = false;
 		}
@@ -117,7 +113,7 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		}
 	}
 
-	void OnResetClick(){
+	public void ResetThings(){
 		ClearAll ();
 		GetOrigins ();
 	}

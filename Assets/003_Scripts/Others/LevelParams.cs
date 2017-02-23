@@ -7,9 +7,11 @@ public class LevelParams : MonoBehaviour {
 	public float maxPartScale;
 	public int maxPart;
 	public float breakForce;
+	public GameObject vehicle;
 
-	void Start(){
+	void OnEnable(){
 		ConstructionManager.Instance.SetLevelParams (minPartScale, maxPartScale, maxPart, breakForce);
+		GameManager.Instance.SetVehicle (vehicle);
 	}
 
 	//for testing purpose only
