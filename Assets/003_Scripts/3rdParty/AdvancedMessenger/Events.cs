@@ -21,4 +21,8 @@
 		WIN,
 		LOSE
 	}
+
+	public enum Background{
+		LEVEL_LOADED
+	}
 }

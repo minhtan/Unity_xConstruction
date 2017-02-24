@@ -1,8 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CameraManager : UnitySingletonPersistent<CameraManager> {
+public class CameraManager : MonoBehaviour {
 	public bool debug = true;
+
+	void OnEnable(){
+		Messenger.AddListener <GameObject> (Events.Background.LEVEL_LOADED, SetCamera);
+	}
+
+	void OnDisable(){
+		Messenger.RemoveListener <GameObject> (Events.Background.LEVEL_LOADED, SetCamera);
+	}
 
 	public void SetCamera(GameObject level){
 		var sprite = level.GetComponent<SpriteRenderer> ().sprite;

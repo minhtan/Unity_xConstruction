@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class LevelManager : MonoBehaviour {
+public class LevelLoader : MonoBehaviour {
 	GameObject currentLvl;
 
 	void Start(){
@@ -15,13 +15,11 @@ public class LevelManager : MonoBehaviour {
 	public void LoadLevel (string lvlToLoad) {
 		if (currentLvl != null) {
 			DestroyImmediate (currentLvl);
-			ConstructionManager.Instance.ClearAll ();
 		}
 
 		StartCoroutine (LoadLevel (lvlToLoad, (go) => {
 			currentLvl = GameObject.Instantiate (go);
-			CameraManager.Instance.SetCamera (currentLvl);
-			ConstructionManager.Instance.Init ();
+			Messenger.Broadcast<GameObject>(Events.Background.LEVEL_LOADED, currentLvl);
 		}));
 	}
 

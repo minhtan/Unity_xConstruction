@@ -3,8 +3,6 @@ using System.Collections;
 
 public class GameManager : UnitySingletonPersistent<GameManager> {
 
-	public GameUIManager UIManager;
-
 	bool trackingTime = false;
 	float time = 0f;
 	float maxTime = 15f;
@@ -17,7 +15,7 @@ public class GameManager : UnitySingletonPersistent<GameManager> {
 		Messenger.AddListener (Events.Game.WIN, OnWin);
 
 		Messenger.AddListener (Events.Buttons.NEXT_LEVEL, OnNextLevelClick);
-		Messenger.AddListener (Events.Buttons.PLAY_AGAIN, OnPlayAgainClick);
+		Messenger.AddListener (Events.Buttons.PLAY_AGAIN, OnResetClick);
 	}
 
 	void OnDisable(){
@@ -26,7 +24,7 @@ public class GameManager : UnitySingletonPersistent<GameManager> {
 		Messenger.RemoveListener (Events.Game.WIN, OnWin);
 
 		Messenger.RemoveListener (Events.Buttons.NEXT_LEVEL, OnNextLevelClick);
-		Messenger.RemoveListener (Events.Buttons.PLAY_AGAIN, OnPlayAgainClick);
+		Messenger.RemoveListener (Events.Buttons.PLAY_AGAIN, OnResetClick);
 	}
 
 	void Update(){
@@ -55,22 +53,15 @@ public class GameManager : UnitySingletonPersistent<GameManager> {
 	}
 
 	void OnNextLevelClick(){
-		UIManager.CloseResultPanels ();
-	}
-
-	void OnPlayAgainClick(){
-		OnResetClick ();
-		UIManager.CloseResultPanels ();
 	}
 
 	void OnWin(){
-		UIManager.OnWin ();
 		trackingTime = false;
 	}
 
 	void OnLose(){
-		UIManager.OnLose ();
 		trackingTime = false;
+		Messenger.Broadcast (Events.Game.LOSE);
 	}
 
 	public void Init (GameObject go, float maxTime) {

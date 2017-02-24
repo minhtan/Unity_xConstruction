@@ -37,6 +37,8 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		Messenger.AddListener (Events.Buttons.SUSPENSION, OnSuspensionClick);
 		Messenger.AddListener (Events.Buttons.RAIL, OnRailClick);
 		Messenger.AddListener (Events.Buttons.DELETE, OnDeleteClick);
+
+		Messenger.AddListener<GameObject> (Events.Background.LEVEL_LOADED, OnLevelLoaded);
 	}
 
 	void OnDestroy() {
@@ -47,12 +49,13 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		Messenger.RemoveListener (Events.Buttons.SUSPENSION, OnSuspensionClick);
 		Messenger.RemoveListener (Events.Buttons.RAIL, OnRailClick);
 		Messenger.RemoveListener (Events.Buttons.DELETE, OnDeleteClick);
+
+		Messenger.RemoveListener<GameObject> (Events.Background.LEVEL_LOADED, OnLevelLoaded);
 	}
 
-	public void Init(){
+	public void Start(){
 		prefabToSpawn = railPrefab;
 		GetOrigins ();
-		Messenger.Broadcast<int, int> (Events.Game.PART_CHANGED, parts.Count, maxPart);
 	}
 
 	void GetOrigins(){
@@ -85,6 +88,7 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		maxScale = maxPartScale;
 		this.maxPart = maxPart;
 		this.breakForce = breakForce;
+		Messenger.Broadcast<int, int> (Events.Game.PART_CHANGED, parts.Count, this.maxPart);
 	}
 
 	void OnSuspensionClick(){
@@ -116,6 +120,10 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 	public void OnResetClick(){
 		ClearAll ();
 		GetOrigins ();
+	}
+
+	void OnLevelLoaded(GameObject go){
+		OnResetClick ();
 	}
 
 	void OnMousePressed(Vector3 pos){
