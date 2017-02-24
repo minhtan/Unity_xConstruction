@@ -3,6 +3,8 @@ using System.Collections;
 
 public class GameManager : UnitySingletonPersistent<GameManager> {
 
+	public GameUIManager UIManager;
+
 	bool trackingTime = false;
 	float time = 0f;
 	float maxTime = 15f;
@@ -15,7 +17,7 @@ public class GameManager : UnitySingletonPersistent<GameManager> {
 		Messenger.AddListener (Events.Game.WIN, OnWin);
 
 		Messenger.AddListener (Events.Buttons.NEXT_LEVEL, OnNextLevelClick);
-		Messenger.AddListener (Events.Buttons.PLAY_AGAIN, OnResetClick);
+		Messenger.AddListener (Events.Buttons.PLAY_AGAIN, OnPlayAgainClick);
 	}
 
 	void OnDisable(){
@@ -24,7 +26,7 @@ public class GameManager : UnitySingletonPersistent<GameManager> {
 		Messenger.RemoveListener (Events.Game.WIN, OnWin);
 
 		Messenger.RemoveListener (Events.Buttons.NEXT_LEVEL, OnNextLevelClick);
-		Messenger.RemoveListener (Events.Buttons.PLAY_AGAIN, OnResetClick);
+		Messenger.RemoveListener (Events.Buttons.PLAY_AGAIN, OnPlayAgainClick);
 	}
 
 	void Update(){
@@ -38,34 +40,43 @@ public class GameManager : UnitySingletonPersistent<GameManager> {
 	}
 
 	void OnPlayClick(){
-		ConstructionManager.Instance.PutThingsInMotion ();
+		ConstructionManager.Instance.OnPlayClick ();
 		ToggleVehicle (true);
 		trackingTime = true;
-		time = 0f;
 	}
 
 	void OnResetClick(){
-		ConstructionManager.Instance.ResetThings ();
+		ConstructionManager.Instance.OnResetClick ();
 		ToggleVehicle (false);
 		trackingTime = false;
+
+		time = 0f;
+		Messenger.Broadcast<float, float> (Events.Game.TIME_CHANGED, time, maxTime);
 	}
 
 	void OnNextLevelClick(){
-		
+		UIManager.CloseResultPanels ();
+	}
+
+	void OnPlayAgainClick(){
+		OnResetClick ();
+		UIManager.CloseResultPanels ();
 	}
 
 	void OnWin(){
+		UIManager.OnWin ();
 		trackingTime = false;
 	}
 
 	void OnLose(){
+		UIManager.OnLose ();
 		trackingTime = false;
 	}
 
 	public void Init (GameObject go, float maxTime) {
 		vehicle = go;
 		this.maxTime = maxTime;
-		Messenger.Broadcast<float, float> (Events.Game.TIME_CHANGED, 0f, maxTime);
+		Messenger.Broadcast<float, float> (Events.Game.TIME_CHANGED, time, maxTime);
 	}
 
 	void ToggleVehicle(bool state){

@@ -5,23 +5,17 @@ public class GameUIManager : MonoBehaviour {
 	public CanvasGroup winPanel;
 	public CanvasGroup losePanel;
 
-	void OnEnable(){
-		Messenger.AddListener (Events.Buttons.NEXT_LEVEL, OnNextLevelClick);
-		Messenger.AddListener (Events.Buttons.PLAY_AGAIN, OnPlayAgainClick);
-	}
-
-	void OnDisable(){
-		Messenger.RemoveListener (Events.Buttons.NEXT_LEVEL, OnNextLevelClick);
-		Messenger.RemoveListener (Events.Buttons.PLAY_AGAIN, OnPlayAgainClick);
-	}
-
-	void OnNextLevelClick(){
-
-	}
-
-	void OnPlayAgainClick(){
+	public void CloseResultPanels(){
 		ToggleCanvasGroup (winPanel, false);
 		ToggleCanvasGroup (losePanel, false);
+	}
+
+	public void OnWin(){
+		ToggleCanvasGroup (winPanel, true);
+	}
+
+	public void OnLose(){
+		ToggleCanvasGroup (losePanel, true);
 	}
 
 	void ToggleCanvasGroup(CanvasGroup gr, bool state){

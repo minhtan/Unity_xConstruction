@@ -99,7 +99,7 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		prefabToSpawn = null;
 	}
 
-	public void PutThingsInMotion(){
+	public void OnPlayClick(){
 		for (int i = 0; i < points.Count; i++) {
 			points [i].GetComponent<Rigidbody2D> ().isKinematic = false;
 		}
@@ -113,7 +113,7 @@ public class ConstructionManager : UnitySingletonPersistent<ConstructionManager>
 		}
 	}
 
-	public void ResetThings(){
+	public void OnResetClick(){
 		ClearAll ();
 		GetOrigins ();
 	}
