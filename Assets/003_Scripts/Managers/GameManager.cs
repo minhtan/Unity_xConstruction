@@ -13,12 +13,18 @@ public class GameManager : UnitySingletonPersistent<GameManager> {
 		Messenger.AddListener (Events.Buttons.PLAY, OnPlayClick);
 		Messenger.AddListener (Events.Buttons.RESET, OnResetClick);
 		Messenger.AddListener (Events.Game.WIN, OnWin);
+
+		Messenger.AddListener (Events.Buttons.NEXT_LEVEL, OnNextLevelClick);
+		Messenger.AddListener (Events.Buttons.PLAY_AGAIN, OnResetClick);
 	}
 
 	void OnDisable(){
 		Messenger.RemoveListener (Events.Buttons.PLAY, OnPlayClick);
 		Messenger.RemoveListener (Events.Buttons.RESET, OnResetClick);
 		Messenger.RemoveListener (Events.Game.WIN, OnWin);
+
+		Messenger.RemoveListener (Events.Buttons.NEXT_LEVEL, OnNextLevelClick);
+		Messenger.RemoveListener (Events.Buttons.PLAY_AGAIN, OnResetClick);
 	}
 
 	void Update(){
@@ -44,13 +50,15 @@ public class GameManager : UnitySingletonPersistent<GameManager> {
 		trackingTime = false;
 	}
 
+	void OnNextLevelClick(){
+		
+	}
+
 	void OnWin(){
-		Time.timeScale = 0f;
 		trackingTime = false;
 	}
 
 	void OnLose(){
-		Time.timeScale = 0f;
 		trackingTime = false;
 	}
 

@@ -10,12 +10,15 @@
 		RAIL,
 		DELETE,
 		PLAY,
-		RESET
+		RESET,
+		PLAY_AGAIN,
+		NEXT_LEVEL
 	}
 
 	public enum Game{
 		PART_CHANGED,
+		TIME_CHANGED,
 		WIN,
-		TIME_CHANGED
+		LOSE
 	}
 }
